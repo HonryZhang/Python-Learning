@@ -20,12 +20,14 @@ with open ('beegfs-client.conf','w') as f_w:
 		if s:
 			continue;
 #		f_w.write(line)
+#对每一行先删除空格，\n等无用的字符，再检查此行是否长度为0
 		data = line.strip()
 		if len(data)!=0:
 			f_w.write(data)
 			f_w.write('\n')
 '''
-
+#统计文本行数，注释行数，空行数
+'''
 total = 0
 blank = 0
 pound = 0
@@ -42,3 +44,20 @@ with open ('beegfs-client.conf','r') as f:
 	print 'Total line:',total
 	print 'Total blank',blank
 	print 'Total pound',pound
+'''
+
+import re
+
+keys = []
+value = []
+dicts={}
+with open ('/proc/meminfo') as f:
+	for line in f:
+		print line
+		res = re.match(r'(.+):\s+(\d+)',line.strip())
+		keys.append(res.group(1))
+		value.append(res.group(2))
+	print keys
+	print value
+	dicts= dict(zip(keys,value))
+	print dicts 	
