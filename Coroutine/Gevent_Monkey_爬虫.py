@@ -7,6 +7,7 @@ import gevent
 import urllib
 import  time
 
+monkey.patch_all() #把当前程序的所有IO操作单独做上标记
 def f(url):
     print 'GET:%s'%url
 #    request = urllib.Request(url)
