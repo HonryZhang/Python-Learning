@@ -41,3 +41,4 @@ if __name__=="__main__":
     while True:
         num = int(raw_input('Please input a number:>>'))
         matrixSearch(matrix,num)
+        
