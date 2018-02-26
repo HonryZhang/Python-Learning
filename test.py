@@ -198,7 +198,7 @@ if __name__ =="__main__":
 #         print 'num exist in the matrix:',num
 #
 # print 34%10,3%10
-
+'''
 def digitCounts(k, n):
     i=j=num=0
     if k==0:
@@ -212,5 +212,40 @@ def digitCounts(k, n):
 
     print num
 digitCounts(2,127)
+
+'''
+import fileinput,socket
+
+def main():
+    options = gather_information(get_defaults())
+    print options
+    hostname = socket.gethostname()
+    print 'the current hostname:',hostname
+
+def get_defaults():
+    return {
+        'management_node': 'name',
+        'management_ip':'1.1.1.1',
+
+    }
+def gather_information(defaults):
+    options = {}
+    options['management_node'] = default_prompt('Management Node', defaults['management_node'])
+    return options
+
+def default_prompt(name, fallback):
+    response = raw_input(name + '(' + fallback + ')'":")
+    #assert isinstance(response, str)
+    if (response):
+        return response
+    else:
+        return fallback
+
+main()
+
+
+
+
+
 
 
