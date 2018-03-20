@@ -213,37 +213,212 @@ def digitCounts(k, n):
     print num
 digitCounts(2,127)
 
-'''
-import fileinput,socket
+# '''
+# import fileinput,socket
+#
+# def main():
+#     options = gather_information(get_defaults())
+#     print options
+#     hostname = socket.gethostname()
+#     print 'the current hostname:',hostname
+#
+# def get_defaults():
+#     return {
+#         'management_node': 'name',
+#         'management_ip':'1.1.1.1',
+#
+#     }
+# def gather_information(defaults):
+#     options = {}
+#     options['management_node'] = default_prompt('Management Node', defaults['management_node'])
+#     return options
+#
+# def default_prompt(name, fallback):
+#     response = raw_input(name + '(' + fallback + ')'":")
+#     #assert isinstance(response, str)
+#     if (response):
+#         return response
+#     else:
+#         return fallback
+#
+# main()
 
-def main():
-    options = gather_information(get_defaults())
-    print options
-    hostname = socket.gethostname()
-    print 'the current hostname:',hostname
+# lista = [1,2,3,4]
+# cmd='mdadm --create /dev/md1 --level=1 --raid-devices='+str(len(lista))
+# a = int(len(lista))
+# for disk in lista:
+#     cmd+= ' '+str(disk)
+#
+#
+# print cmd
 
-def get_defaults():
-    return {
-        'management_node': 'name',
-        'management_ip':'1.1.1.1',
+import re
+str = '''Personalities : [raid0] [raid1]
+md2 : active raid1 sde[1] sdd[0]
+      8380416 blocks super 1.2 [2/2] [UU]
 
-    }
-def gather_information(defaults):
-    options = {}
-    options['management_node'] = default_prompt('Management Node', defaults['management_node'])
-    return options
+md1 : active raid0 sdc[1] sdb[0]
+      16760832 blocks super 1.2 512k chunks'''
+#
+# while True:
+#     s_raid_type = raw_input('Select the Storage Server RAID Type <5 or 6>:').rstrip()
+#     print s_raid_type
+#     if s_raid_type.isdigit():
+#         print 'data'
+#     if (s_raid_type) !='ext4' and (s_raid_type) !='xfs':
+#         print 'No matched RAID Type, select again.\n'
+#
+#     else:
+#
+#         break
 
-def default_prompt(name, fallback):
-    response = raw_input(name + '(' + fallback + ')'":")
-    #assert isinstance(response, str)
-    if (response):
-        return response
+
+import paramiko,sys,os
+def cluster_ssh2(ip,username,passwd,cmd):
+    try:
+        ssh = paramiko.SSHClient()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        ssh.connect(ip,22,username,passwd,timeout=5)
+        exit_flag = False
+        for m in cmd:
+            print 'Current CMD is:',m
+            stdin,stdout,stderr = ssh.exec_command(m)
+            err_list = stderr.readlines()
+           # print "err_list:",err_list
+            print "out_listxxxxxxxxxxxx:", stdout.readlines()
+            if len(err_list)>0:
+                print err_list[1],
+                if 'could not be found' in err_list[1]:
+                    print'\033[1;31m Service is not installed or restarted\033[0m'
+                    continue
+                else:
+                    sys.exit('\033[1;31m Error: Incorrect Command:\033[0m %s' % (m))
+            else:
+                print '%s:\tOK\n' %(ip)
+                for out in stdout.readlines():
+                    out = out.rstrip()
+                    if 'Error' in out or 'ERROR' in out or 'error' in out:
+                        sys.exit('\033[1;31m Error: Failed to execute command:\033[0m %s'%(m))
+                    elif 'is stopped' in out:
+                        print 'Instance is existed, but it\'s stopped. Starting it'
+                        #exit_flag=True
+                        break
+                    elif 'is running' in out:
+                        exit_flag=True
+                        break
+                    else:
+                        print out
+            if exit_flag:
+                break
+        ssh.close()
+        return True
+    except SystemExit,value:
+        print '%s:\t%s'%(ip,value)
+        return False
+    except Exception,e:
+        print '\033[1;31mError:\033[0m',e
+        return False
+
+ #       sys.exit('Connection Failed')
+if __name__ =="__main__":
+    ip ='192.168.10.249'
+    username ='root'
+    passwd = 'admin'
+    #cmd=['/opt/orcafs/sbin/orcafs-setup-mgtd -p /data/orcafs/orcafs_mgmtd','dsad']
+    #cmd = ['sudo curl -o /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo']
+    cmd =['cd fio && ./configure && make && make install']
+    #cluster_ssh2(ip, username, passwd, cmd)
+    if(cluster_ssh2(ip,username,passwd,cmd)):
+        print 'xxx',
     else:
-        return fallback
+        print 'uuu',
+    # print('This is a \033[1;31m test \033[0m!')
 
-main()
 
 
+# import sys
+#
+# def exitfunc(value):
+#     print value
+#     sys.exit(0)d
+#
+# print "hello"
+#
+# try:
+#     sys.exit(1)
+# except SystemExit,value:
+#     exitfunc(value)
+#
+# print "come?"
+'''
+import time,threading,sys
+
+
+def run():
+    try:
+        for i in range(1,5):
+            print 'Current name:', threading.current_thread().name
+            if i>3:
+                sys.exit('\033[1;31m Error: Incorrect Command:\033[0m')
+        return True
+    except SystemExit, value:
+        print '%s' % ( value)
+        return False
+
+
+def thread():
+    start_time = time.time()
+
+    print 'Main:', threading.current_thread().name
+    thread_list = []
+    for i in range(5):
+        t = threading.Thread(target=run)
+        thread_list.append(t)
+
+    for t in thread_list:
+        t.setDaemon(True)
+        t.start()
+
+    for t in thread_list:
+        t.join()
+
+    print 'Main over' , threading.current_thread().name
+    print 'Total:', time.time()-start_time
+    return True
+
+if __name__ == '__main__':
+    thread()
+'''
+'''
+import paramiko,sys
+def ssh2(ip,username,passwd,cmd):
+    try:
+        ssh = paramiko.SSHClient()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        ssh.connect(ip,22,username,passwd,timeout=5)
+        for m in cmd:
+            print 'Current CMD is:',m
+            stdin,stdout,stderr = ssh.exec_command(m,get_pty=True)
+            print 'out:',stdout.readlines()
+            print 'err:',stderr.readlines()
+            out = stdout.readlines()
+            for o in out:
+                print o.rstrip()
+        print '%s:\tOK\n'%(ip)
+        ssh.close()
+        return True
+    except:
+        print '%s:\tError\n'%(ip)
+        sys.exit('Connection Failed')
+
+if __name__=='__main__':
+    ip ='192.168.10.249'
+    username ='root'
+    passwd = 'admin'
+    cmd = ['cd fio && ./configure && make && make install']
+    ssh2(ip, username, passwd, cmd)
+
+'''
 
 
 
