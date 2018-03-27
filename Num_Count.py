@@ -37,7 +37,7 @@ if __name__=="__main__":
     while True:
         value = int(raw_input('Please input a target value:>>'))
         number = int(raw_input('Please input a digit:>>'))
-        if value>0 and number >=0 and number <10:
+        if (value>0) and ((number >=0) and (number <10)):
             digitCounts(value,number)
         else:
             print 'Exited.Please check your input. the target value must be a positive integer and the number must between 0 and 9 '

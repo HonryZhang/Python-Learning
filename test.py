@@ -252,13 +252,13 @@ digitCounts(2,127)
 #
 # print cmd
 
-import re
-str = '''Personalities : [raid0] [raid1]
-md2 : active raid1 sde[1] sdd[0]
-      8380416 blocks super 1.2 [2/2] [UU]
-
-md1 : active raid0 sdc[1] sdb[0]
-      16760832 blocks super 1.2 512k chunks'''
+# import re
+# str = '''Personalities : [raid0] [raid1]
+# md2 : active raid1 sde[1] sdd[0]
+#       8380416 blocks super 1.2 [2/2] [UU]
+#
+# md1 : active raid0 sdc[1] sdb[0]
+#       16760832 blocks super 1.2 512k chunks'''
 #
 # while True:
 #     s_raid_type = raw_input('Select the Storage Server RAID Type <5 or 6>:').rstrip()
@@ -272,7 +272,7 @@ md1 : active raid0 sdc[1] sdb[0]
 #
 #         break
 
-
+'''
 import paramiko,sys,os
 def cluster_ssh2(ip,username,passwd,cmd):
     try:
@@ -334,7 +334,7 @@ if __name__ =="__main__":
         print 'uuu',
     # print('This is a \033[1;31m test \033[0m!')
 
-
+'''
 
 # import sys
 #
@@ -420,7 +420,250 @@ if __name__=='__main__':
 
 '''
 
+'''
+def remote_install():
+    #local_remote_file=dict()
+    username  = 'root'
+    passwd = '11'
+
+    local_remote_file={'Remote_install_rpm.py':'/root/Remote_install_rpm.py','hostconfig':'/root/hostconfig','Helper.py':'/root/Helper.py'}
+    for v in range(1,3):
+        print 'ip address:', v
+        ip = v
+        get_value(ip,username,passwd,**local_remote_file)
+    #cmd = ['python Remote_install_rpm.py','rm -rf Remote_install_rpm.py','rm -rf hostconfig','rm -rf Helper.py']
+    #thread_run(cmd)
+    #return True
+def get_value(ip,username,passwd,**kwargs):
+    print 'Ip:',ip
+    print 'name:',username
+    print 'passwd:',passwd
+    for k,v in kwargs.items():
+        print 'k:',k + ' | '+'v:',v
+
+remote_install()
+'''
+
+# str = 'loveleetcode'
+# print str[::-1]
+# print str[:-5:-3]
+# for i in range(len(str)):
+#     str1 = str[i+1:]
+#     if (str[i] not in str1) and (str[i] not in str[0:i]):
+#         print str[i],i
+
+# def outer():
+#     x = 10
+#     def inner():
+#         print x
+#
+#     return inner
+#
+# outer()()
+#
+# f = outer()
+# f()
+#list = [1,2,4,5,6,7,7]
+#print map(lambda x:list[x-1],map(lambda x:x%2==0,range(1,len(list))))
+#print filter(lambda x:x%2==0,range(len(list)))
+#print reduce(lambda x,y:x+y,map(lambda x:x+3,map(lambda x:list[x-1],map(lambda x:x%2==0,range(1,len(list))))))
+#print reduce(lambda x,y:x+y,map(lambda x:x+3,map(lambda x:list[x],filter(lambda x:x%2==0,range(1,len(list))))))
+import collections
+# s = 'asdr'
+# wanted = collections.Counter(s)
+# print wanted
+# for i,c in enumerate(s):
+#     print i,c
+
+#
+# list = [1,2,3,4,5,6]
+# print [list[i] for i in list if i%2==0]
+# print map(lambda x:x+3,map(lambda x:list[x-1],filter(lambda x:x%2==0,range(1,len(list)+1))))
+# def remove(alist):
+#     for i in alist:
+#         if i % 2 == 0:
+#             del alist[alist.index(i)]
+#     print sum(alist)
+#
+# remove(list)
+
+#
+'''
+def getminWindow(source, target):
+    score = 0
+    wanted = collections.Counter(target)#get the char count in the target string
+    start, end = 0, len(source)
+    tmp = {} #define a temp dictionary, the key is the char, the value is the count
+    tmp_list = collections.deque([]) #get the matched char index
+    for index, char in enumerate(source):
+        if char in wanted:
+            tmp_list.append(index)   #获取字符的索引
+            tmp[char] = tmp.get(char, 0) + 1 #如果字符不存在新的字典中，则加入并且 value+1,如果已经存在，value 直接+1，#if the value of tmp[char] not exist, add into the dict
+           # print tmp.get(c,0)
+            #print d
+            print 'tmp_dict',tmp
+            print 'tmp_list',tmp_list
+            if tmp[char] <= wanted[char]:
+                print int(tmp[char])  #
+                print int(wanted[char])
+                score += 1  #score的值匹配 target的长度
+            print tmp_list[0]
+            print source[tmp_list[0]]
+            print tmp[source[tmp_list[0]]]
+            print wanted[source[tmp_list[0]]]
+            while tmp_list and tmp[source[tmp_list[0]]] > wanted[source[tmp_list[0]]]:
+
+                tmp[source[tmp_list.popleft()]] -= 1
+                print tmp
+                print tmp_list
+            if score == len(target) and tmp_list[-1] - tmp_list[0] < end - start:
+                start, end = tmp_list[0], tmp_list[-1] #return the matched index
+    print  source[start:end + 1]
+    print tmp_list
+#
+source = "ADBEBANC"
+target="ABC"
+getminWindow( source, target)
+'''
+
+# def getMinWindow(source,tar):
+#     count = 0
+#     start=0
+#     end=0
+#     tar_dict = collections.Counter(tar) #get the char count in the target string
+#     tmp_dict = {}   #define a temp dictionary, the key is the char, the value is the count
+#     tmp_list = []   #define a temp list
+#     for k,v in enumerate(source):  #get the char and the index info of source string
+#         if v in tar_dict:  #if the char in the target str(tmp_dict)
+#             tmp_list.append(k) # add the index to a temp list
+#             tmp_dict[v] = tmp_dict.get(v, 0) + 1 # if the key is v, get the value. if not exist, add 1 time
+#             if tmp_dict[v]<=tar_dict[v]:
+#                 count +=1
+#             if tmp_list and tmp_dict[source[tmp_list[0]]]> tar_dict[source[tmp_list[0]]]:
+#                 tmp_dict[source[tmp_list.pop(0)]]-=1
+#             if count ==int(len(tar)):
+#                 start,end = tmp_list[0],tmp_list[-1]
+#     print source[start,end+1]
+#
+# s = "ADOBECODEBANC"
+# t="ABC"
+# getMinWindow( s, t)
 
 
+# def reverse(str):
+#     result = str.split(' ')
+#     print result
+#     for i in range(len(result)/2):
+#         result[i],result[len(result)-1-i] = result[len(result)-1-i],result[i]
+#     str = ' '.join(result)
+#
+#     print str
+#
+# reverse('this is a test script')
+# reverse('hello smart guy')
+# a =[3,4,6,5,3]
+# print reduce(lambda x, y: x+y, [a[x]+(x)%2*3 for x in range(len(a))])
 
 
+'''
+import sys,re
+#sys.path.append('../Paramiko')
+def get_hostinfo():
+    host_info = {}
+    with open('/Users/hongrui/PycharmProjects/Orcadt/Python-Learning/Paramiko/hostconfig') as f:
+        for line in f.readlines():
+            line_list = re.split(r'\s+', line.rstrip())
+            info = [line_list[1], line_list[2]]
+            host_info[line_list[0]] = info
+    f.close()
+    #key= list(host_info)[0]
+    #print key
+    return host_info
+#get_hostinfo()
+
+#m_raid_name = 'md0'
+#m_raid_type = '5'
+#m_mount_path = 'mnt/md0'
+
+host_info = get_hostinfo()
+metadata_server_info ={}
+storage_server_info ={}
+for k,v in host_info.items():
+    #print 'v:',v
+    if v[1]=='Metadata':
+        m_raid_name = raw_input('raid_name:')
+        m_raid_type = raw_input('raid_type:')
+        m_mount_path = raw_input('path:')
+
+        metadata_server_info[k] = [
+                            {
+                                'raid_name': m_raid_name,
+                                'raid_type': m_raid_type,
+                                'mount_path': m_mount_path,
+                                'host_role': v[1] ,
+                                'ip':v[0]
+                            }
+                        ]
+    elif v[1]=='Storage':
+        s_raid_name = raw_input('raid_name:') 
+        s_raid_type = raw_input('raid_type:')
+        s_mount_path = raw_input('path:')
+        storage_server_info[k] = [
+                            {   'raid_name': s_raid_name,
+                                'raid_type': s_raid_type,
+                                'mount_path': s_mount_path,
+                                'host_role': v[1] ,
+                                'ip':v[0]
+                            }
+                        ]
+info = dict(storage_server_info,**metadata_server_info)
+print info
+
+for key,values in info.items():
+    for value in values:
+        print value
+        if value['host_role']=='Storage':
+            path = value['mount_path']
+            print path ,key ,value['ip']
+
+'''
+
+
+# params = {"username":['testname',123], "passwd":['class',234],'abx':['age',344],"usee":['tame',123]}
+# pa =    {"user":['testname',123], "ttt":['class',234]}
+#
+# d={'a':1,'b':2,'c':3}
+#
+# dd={'c':11,'d':22,'e':33}
+# d.update(dd)
+# print d
+# params.update(pa)
+# print params
+# p = dict(pa,**params)
+# print p
+
+def yield_test(n):
+    for i in range(n):
+        yield call(i)
+        print("i=",i)
+    #做一些其它的事情
+    print("do something.")
+    print("end.")
+
+def call(i):
+    return i*2
+
+#使用for循环
+for i in yield_test(5):
+    print(i,",")
+
+def f123():
+    yield 1
+    print 'yyyy'
+    yield 2
+    print 'xxxx'
+    yield 3
+    print 'zzzz'
+
+for item in f123():
+    print item

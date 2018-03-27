@@ -55,7 +55,7 @@ def install_basic():
         'yum -y update',
         'sudo yum install -y mdadm libuuid-devel libibverbs-devel librdmacm-devel libattr-devel redhat-rpm-config',
         'sudo yum install -y rpm-build xfsprogs-devel cppunit cppunit-devel zlib-devel openssl-devel sqlite',
-        'sudo yum install -y sqlite-devel ant gcc-c++ gcc redhat-lsb-core java-devel',
+        'sudo yum install -y sqlite-devel ant gcc-c++ gcc redhat-lsb-core java-devel nfs-utils',
         'sudo service sshd restart',
         'sudo service ntpd restart',
         'systemctl stop firewalld.service',
@@ -72,17 +72,20 @@ def install_basic():
     ]
     # host_info = Helper.get_hostinfo()
     exit_flag = False
-    for key in host_info.keys():
+    if thread_run(cmd_basic):
+        exit_flag=True
+    for values in host_info.values():
         #ip = host_info[key][0]
-        if key=='Client':
-            ip = host_info[key][0]
+        if values[1]=='Client':
+            ip = values[0]
             #cmd = cmd_basic+cmd_client
             if(ssh2(ip, username, passwd, cmd_client)):
                 exit_flag=True
-        else:
-            thread_run(cmd_basic)
-            exit_flag=True
-            break
+                break
+            else:
+                sys.exit(0)
+
+
     return exit_flag
             #ip = host_info[key][0]
             #thread_run(cmd)
@@ -117,10 +120,10 @@ def install_basic():
 
 def write_etc_host():
     exit_flag = False
-    host_info = Helper.get_hostinfo()
+    #host_info = Helper.get_hostinfo()
     cmd_list = []
-    for value in host_info.values():
-        cmd = 'sudo echo '+value[0]+' '+value[1]+' |sudo tee -a /etc/hosts'
+    for key,values in host_info.items():
+        cmd = 'sudo echo '+values[0]+' '+key+' |sudo tee -a /etc/hosts'
         cmd_list.append(cmd)
 
     for v in host_info.values():
@@ -237,7 +240,7 @@ def rpm_Download():
     exit_flag=False
     cmd_list=[]
     ftp_path = str(raw_input('Input the whole and correct ftp link address:'))
-    cmd_str = 'wget -nH -m --ftp-user=ftpUser --ftp-password=ftp ftp://192.168.100.97/orcafs-packages'+ ftp_path
+    cmd_str = 'wget -nH -m --ftp-user=ftpUser --ftp-password=ftp ftp://192.168.100.97/orcafs-packages/'+ ftp_path
     cmd_list.append(cmd_str)
 
     # for v in host_info.values():
@@ -252,7 +255,7 @@ def rpm_Download():
     return True
 
 
-def scp_to_server(ip,username,passwd,local_remote_file):
+def scp_to_server(ip,username,passwd,**local_remote_file):
     try:
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -277,18 +280,19 @@ def scp_to_server(ip,username,passwd,local_remote_file):
         return False
 
 def remote_install():
-    local_remote_file=dict()
-    username  = Helper.get_credential()['username']
-    passwd = Helper.get_credential()['password']
-    host_info = Helper.get_hostinfo()
-    local_remote_file['Remote_install_rpm.py']='/root/Remote_install_rpm.py'
-    local_remote_file['hostconfig'] = '/root/hostconfig'
-    local_remote_file['Helper.py'] = '/root/Helper.py'
+    #local_remote_file=dict()
+    # username  = Helper.get_credential()['username']
+    # passwd = Helper.get_credential()['password']
+    # host_info = Helper.get_hostinfo()
+    local_remote_file={'Remote_install_rpm.py':'/root/Remote_install_rpm.py','hostconfig':'/root/hostconfig','Helper.py':'/root/Helper.py'}
+    # local_remote_file['Remote_install_rpm.py']='/root/Remote_install_rpm.py'
+    # local_remote_file['hostconfig'] = '/root/hostconfig'
+    # local_remote_file['Helper.py'] = '/root/Helper.py'
 
     for v in host_info.values():
         print 'ip address:', v[0]
         ip = v[0]
-        scp_to_server(ip,username,passwd,local_remote_file)
+        scp_to_server(ip,username,passwd,**local_remote_file)
     cmd = ['python Remote_install_rpm.py','rm -rf Remote_install_rpm.py','rm -rf hostconfig','rm -rf Helper.py']
     thread_run(cmd)
     return True
@@ -297,104 +301,189 @@ def remote_install():
 
 
 def storage_mgmt():
-    host_info = Helper.get_hostinfo()
-    username  = Helper.get_credential()['username']
-    passwd = Helper.get_credential()['password']
-    local_remote_file = {}
-    local_remote_file['Helper.py'] = '/root/Helper.py'
-    local_remote_file['Storage_Mgmt.py'] = '/root/Storage_Mgmt.py'
+    # host_info = Helper.get_hostinfo()
+    # username  = Helper.get_credential()['username']
+    # passwd = Helper.get_credential()['password']
+    local_remote_file = {'Helper.py':'/root/Helper.py','Storage_Mgmt.py':'/root/Storage_Mgmt.py'}
+    # local_remote_file['Helper.py'] = '/root/Helper.py'
+    # local_remote_file['Storage_Mgmt.py'] = '/root/Storage_Mgmt.py'
 
-    print 'RAID Type:5> RAID5; 6> RAID6\n'
+    # print 'RAID Type:5> RAID5; 6> RAID6\n'
+    #
+    # while True:
+    #     s_raid_type = raw_input('Select the Storage Server RAID Type <5 or 6>:')
+    #     if int(s_raid_type) != 5 and int(s_raid_type) != 6:
+    #         print 'No matched RAID Type, select again.\n'
+    #     else:
+    #         break
+    # s_raid_name = raw_input('Input the RAID Name <such as md0, md1..>:')
+    # s_disk_count = int(raw_input('Input the disk count in the RAID Group.'))
+    #
+    # while True:
+    #     s_fs_type = raw_input('Select local file system type:<ext4,xfs>:')
+    #     if s_fs_type != 'ext4' and s_fs_type != 'xfs':
+    #         print 'No matched Filesystem Type, select again.\n'
+    #     else:
+    #         break
+    #s_mount_path_list=[]
 
-    while True:
-        s_raid_type = raw_input('Select the Storage Server RAID Type <5 or 6>:')
-        if int(s_raid_type) != 5 and int(s_raid_type) != 6:
-            print 'No matched RAID Type, select again.\n'
-        else:
-            break
-    s_raid_name = raw_input('Input the RAID Name <such as md0, md1..>:')
-    s_disk_count = int(raw_input('Input the disk count in the RAID Group.'))
+    storage_server_info={}
+    for key,values in host_info.items():
+        if values[1]=='Storage':
+            print 'Config Storage Server %s:' % key
+            print 'RAID Type:5> RAID5; 6> RAID6\n'
 
-    while True:
-        s_fs_type = raw_input('Select local file system type:<ext4,xfs>:')
-        if s_fs_type != 'ext4' and s_fs_type != 'xfs':
-            print 'No matched Filesystem Type, select again.\n'
-        else:
-            break
+            while True:
+                s_raid_type = raw_input('Select the Storage Server RAID Type <5 or 6>:')
+                if int(s_raid_type) != 5 and int(s_raid_type) != 6:
+                    print 'No matched RAID Type, select again.\n'
+                else:
+                    break
+            s_raid_name = raw_input('Input the RAID Name <such as md0, md1..>:')
+            s_disk_count = int(raw_input('Input the disk count in the RAID Group.'))
 
-    s_mount_path = raw_input('Input the filesystem mount path:')
+            while True:
+                s_fs_type = raw_input('Select local file system type:<ext4,xfs>:')
+                if s_fs_type != 'ext4' and s_fs_type != 'xfs':
+                    print 'No matched Filesystem Type, select again.\n'
+                else:
+                    break
 
-    for key in host_info.keys():
-        if key=='Storage':
-            ip = host_info[key][0]
-            scp_to_server(ip,username,passwd,local_remote_file)
-
-    cmd = ['python Storage_Mgmt.py '+str(s_raid_type)+' '+s_raid_name+' '+str(s_disk_count)+' '+s_fs_type+' '+s_mount_path,'rm -rf Storage_Mgmt.py','rm -rf Helper.py']
-    for key1 in host_info.keys():
-        if key1 == 'Storage':
-            ip = host_info[key1][0]
+            s_mount_path = raw_input('Input the filesystem mount path of Storage Server %s:'%key)
+            ip = values[0]
+            scp_to_server(ip, username, passwd, **local_remote_file)
+            cmd = ['python Storage_Mgmt.py ' + str(s_raid_type) + ' ' + s_raid_name + ' ' + str(s_disk_count) + ' ' + s_fs_type + ' ' + s_mount_path, 'rm -rf Storage_Mgmt.py', 'rm -rf Helper.py']
             ssh2(ip, username, passwd, cmd)
-            return s_mount_path
+            #s_mount_path_list.append(s_mount_path)
+            storage_server_info[key] = [
+                    {
+                        'raid_name': s_raid_name,
+                        'raid_type': s_raid_type,
+                        'mount_path': s_mount_path,
+                        'host_role': values[1],
+                        'ip_address':values[0]
+                    }
+                ]
+    return storage_server_info
+
+
+    #
+    # for values in host_info.values():
+    #     if values[1]=='Storage':
+    #         ip = values[0]
+    #         scp_to_server(ip,username,passwd,**local_remote_file)
+    #
+    # cmd = ['python Storage_Mgmt.py '+str(s_raid_type)+' '+s_raid_name+' '+str(s_disk_count)+' '+s_fs_type+' '+s_mount_path,'rm -rf Storage_Mgmt.py','rm -rf Helper.py']
+    # for values1 in host_info.values():
+    #     if values1[1] == 'Storage':
+    #         ip = values1[0]
+    #         ssh2(ip, username, passwd, cmd)
+    #         return s_mount_path
 
 def metadata_mgmt():
     # host_info = Helper.get_hostinfo()
     # username  = Helper.get_credential()['username']
     # passwd = Helper.get_credential()['password']
-    local_remote_file = {}
-    local_remote_file['Helper.py'] = '/root/Helper.py'
-    local_remote_file['Metadata_Mgmt.py'] = '/root/Metadata_Mgmt.py'
+    local_remote_file = {'Helper.py':'/root/Helper.py','Metadata_Mgmt.py':'/root/Metadata_Mgmt.py'}
+    # local_remote_file['Helper.py'] = '/root/Helper.py'
+    # local_remote_file['Metadata_Mgmt.py'] = '/root/Metadata_Mgmt.py'
 
-    print 'RAID Type:1> RAID1; 10> RAID10\n'
+    # print 'RAID Type:1> RAID1; 10> RAID10\n'
+    #
+    # while True:
+    #     m_raid_type = int(raw_input('Select the Metadata Server RAID Type <1 or 10>:'))
+    #     if int(m_raid_type) != 1 and int(m_raid_type) != 10:
+    #         print 'No matched RAID Type, select again.\n'
+    #     else:
+    #         break
+    # m_raid_name = raw_input('Input the RAID Name <such as md0, md1..>:')
+    # m_disk_count = int(raw_input('Input the disk count in the RAID Group.'))
+    #
+    #
+    # while True:
+    #     m_fs_type = raw_input('Select local file system type:<ext4,xfs>:')
+    #     if m_fs_type != 'ext4' and m_fs_type != 'xfs':
+    #         print 'No matched Filesystem Type, select again.\n'
+    #     else:
+    #         break
 
-    while True:
-        m_raid_type = int(raw_input('Select the Metadata Server RAID Type <1 or 10>:'))
-        if int(m_raid_type) != 1 and int(m_raid_type) != 10:
-            print 'No matched RAID Type, select again.\n'
-        else:
-            break
-    m_raid_name = raw_input('Input the RAID Name <such as md0, md1..>:')
-    m_disk_count = int(raw_input('Input the disk count in the RAID Group.'))
+    #m_mount_path_list=[]
 
+    metadata_server_info={}
 
-    while True:
-        m_fs_type = raw_input('Select local file system type:<ext4,xfs>:')
-        if m_fs_type != 'ext4' and m_fs_type != 'xfs':
-            print 'No matched Filesystem Type, select again.\n'
-        else:
-            break
-    m_mount_path = raw_input('Input the filesystem mount path:')
+    for key,values in host_info.items():
+        if values[1]=='Metadata':
+            print 'Config Metadata Server %s:'%key
+            print 'RAID Type:1> RAID1; 10> RAID10\n'
 
-    for key in host_info.keys():
-        if key=='Metadata':
-            ip = host_info[key][0]
-            scp_to_server(ip,username,passwd,local_remote_file)
+            while True:
+                m_raid_type = int(raw_input('Select the Metadata Server RAID Type <1 or 10>:'))
+                if int(m_raid_type) != 1 and int(m_raid_type) != 10:
+                    print 'No matched RAID Type, select again.\n'
+                else:
+                    break
+            m_raid_name = raw_input('Input the RAID Name <such as md0, md1..>:')
+            m_disk_count = int(raw_input('Input the disk count in the RAID Group.'))
 
-    cmd = ['python Metadata_Mgmt.py '+str(m_raid_type)+' '+m_raid_name+' '+str(m_disk_count)+' '+m_fs_type+' '+m_mount_path,'rm -rf Metadata_Mgmt.py','rm -rf Helper.py']
-    # if thread_run(cmd):
-    #     return m_mount_path
-    # else:
-    #     return False
-    for key1 in host_info.keys():
-        if key1=='Metadata':
-            ip = host_info[key1][0]
+            while True:
+                m_fs_type = raw_input('Select local file system type:<ext4,xfs>:')
+                if m_fs_type != 'ext4' and m_fs_type != 'xfs':
+                    print 'No matched Filesystem Type, select again.\n'
+                else:
+                    break
+
+            m_mount_path = raw_input('Input the filesystem mount path of Metadata Server %s:'%key)
+            ip = values[0]
+            scp_to_server(ip,username,passwd,**local_remote_file)
+            cmd = ['python Metadata_Mgmt.py ' + str(m_raid_type) + ' ' + m_raid_name + ' ' + str(m_disk_count) + ' ' + m_fs_type + ' ' + m_mount_path, 'rm -rf Metadata_Mgmt.py', 'rm -rf Helper.py']
             ssh2(ip, username, passwd, cmd)
-            return m_mount_path
+            #m_mount_path_list.append(m_mount_path)
+            metadata_server_info[key] =[
+                    {
+                        'raid_name': m_raid_name,
+                        'raid_type': m_raid_type,
+                        'mount_path': m_mount_path,
+                        'host_role': values[1],
+                        'ip_address':values[0]
+                    }
+                ]
+
+    return metadata_server_info
+
+    # cmd = ['python Metadata_Mgmt.py '+str(m_raid_type)+' '+m_raid_name+' '+str(m_disk_count)+' '+m_fs_type+' '+m_mount_path,'rm -rf Metadata_Mgmt.py','rm -rf Helper.py']
+    # # if thread_run(cmd):
+    # #     return m_mount_path
+    # # else:
+    # #     return False
+    # for values in host_info.values():
+    #     if values[1]=='Metadata':
+    #         ip = values[0]
+    #         ssh2(ip, username, passwd, cmd)
+    #         return m_mount_path
+
+#config_info = {'Meta1': [{'host_role': 'Metadata', 'raid_name': 'md0', 'mount_path': 'mt/md0', 'raid_type': '5'}],
+#               }
 
 
-def config_cluster(s_mount_path,m_mount_path):
+def config_cluster(**config_info):
     # host_info = Helper.get_hostinfo()
     # username = Helper.get_credential()['username']
     # passwd = Helper.get_credential()['password']
-    mgmt_host_name = host_info['Management'][1]
+    mgmt_host_name = ''
+    for k,v in host_info.items():
+        if v[1]=='Management':
+            mgmt_host_name = k
+    #mgmt_host_name = host_info
     exit_flag = False
-    for key1 in host_info.keys():
-        if key1 == 'Management':
-            ip = host_info[key1][0]
+    for values in host_info.values():
+        if values[1] == 'Management':
+            ip = values[0]
             #print 'Check the management instance.\n'
             # cmd = ['sudo service orcafs-mgmtd status','sudo service orcafs-mgmtd start']
             # if(cluster_ssh2(ip,username,passwd,cmd)):
-            print 'Define the mamagement service running path.\n'
-            cmd = ['sudo service orcafs-mgmtd status','sudo /opt/orcafs/sbin/orcafs-setup-mgmtd -p /'+m_mount_path+'/orcafs/beegfs_mgmtd','sudo systemctl start orcafs-mgmtd','sudo service orcafs-mgmtd status']
+            print 'Define the management service running path.\n'
+            mgmt_path = raw_input('Input the management service running path:')
+            cmd = ['sudo service orcafs-mgmtd status','sudo /opt/orcafs/sbin/orcafs-setup-mgmtd -p /'+mgmt_path+'/orcafs/beegfs_mgmtd','sudo systemctl start orcafs-mgmtd','sudo service orcafs-mgmtd status']
             #ssh2(ip, username, passwd, cmd)
             if (cluster_ssh2(ip, username, passwd, cmd)):
                 print 'Mamagement service configured.'
@@ -404,34 +493,70 @@ def config_cluster(s_mount_path,m_mount_path):
 
         else:
             continue
-    for key2 in host_info.keys():
-        if key2 == 'Metadata':
-            ip = host_info[key2][0]
-            print 'Define a custom numeric metadata service ID (range 1..65535)\n'
-            id = raw_input('Metadata Service ID:')
-            cmd = ['sudo service orcafs-meta status','sudo /opt/orcafs/sbin/orcafs-setup-meta -p /'+m_mount_path+'/orcafs/orcafs_meta -s '+id+' -m '+mgmt_host_name,'sudo systemctl start orcafs-meta','sudo service orcafs-meta status']
-            if (cluster_ssh2(ip, username, passwd, cmd)):
-                print 'Metadata service configured.'
-                exit_flag = True
-            else:
-                sys.exit('Failed to configure metadata.')
-        elif key2 =='Storage':
-            ip = host_info[key2][0]
-            print 'Define a custom numeric storage service ID and numeric storage target ID (both in range 1..65535)\n'
-            service_id =raw_input('Storage service ID:')
-            target_id = raw_input('Storage target ID:')
-            cmd = ['sudo service orcafs-storage status','sudo /opt/orcafs/sbin/orcafs-setup-storage -p /' + s_mount_path + '/orcafs_storage -s ' + service_id + ' -i '+target_id+' -m ' + mgmt_host_name,'sudo systemctl start orcafs-storage','sudo service orcafs-storage status']
-            if (cluster_ssh2(ip, username, passwd, cmd)):
-                print 'Storage service configured.'
-                exit_flag = True
-            else:
-                sys.exit('Failed to configure storage.')
-        else:
-            continue
 
-    for key3 in host_info.keys():
-        if key3=='Client':
-            ip = host_info[key3][0]
+    for key,values in config_info.items():
+        for value in values:
+            if value['host_role']=='Metadata':
+                ip = value['ip_address']
+                m_mount_path = value['mount_path']
+                print 'Define a custom numeric metadata service ID (range 1..65535) \n'
+                id = raw_input('Metadata Service ID of server %s:' % key)
+                cmd = ['sudo service orcafs-meta status',
+                       'sudo /opt/orcafs/sbin/orcafs-setup-meta -p /' + m_mount_path + '/orcafs/orcafs_meta -s ' + id + ' -m ' + mgmt_host_name,
+                       'sudo systemctl start orcafs-meta', 'sudo service orcafs-meta status']
+                if (cluster_ssh2(ip, username, passwd, cmd)):
+                    print 'Metadata service configured.'
+                    exit_flag = True
+                else:
+                    sys.exit('Failed to configure metadata.')
+
+            if value['host_role']=='Storage':
+                ip = value['ip_address']
+                s_mount_path = value['mount_path']
+                print 'Define a custom numeric storage service ID and numeric storage target ID (both in range 1..65535)\n'
+                service_id = raw_input('Storage service ID of server %s:'%key)
+                target_id = raw_input('Storage target ID of server %s:'%key)
+                cmd = ['sudo service orcafs-storage status',
+                       'sudo /opt/orcafs/sbin/orcafs-setup-storage -p /' + s_mount_path + '/orcafs_storage -s ' + service_id + ' -i ' + target_id + ' -m ' + mgmt_host_name,
+                       'sudo systemctl start orcafs-storage', 'sudo service orcafs-storage status']
+                if (cluster_ssh2(ip, username, passwd, cmd)):
+                    print 'Storage service configured.'
+                    exit_flag = True
+                else:
+                    sys.exit('Failed to configure storage.')
+
+
+
+
+
+    # for key,values1 in host_info.values():
+    #     if values1[1] == 'Metadata':
+    #         ip = values1[0]
+    #         print 'Define a custom numeric metadata service ID (range 1..65535) \n'
+    #         id = raw_input('Metadata Service ID of server %s:'%key)
+    #         cmd = ['sudo service orcafs-meta status','sudo /opt/orcafs/sbin/orcafs-setup-meta -p /'+m_mount_path+'/orcafs/orcafs_meta -s '+id+' -m '+mgmt_host_name,'sudo systemctl start orcafs-meta','sudo service orcafs-meta status']
+    #         if (cluster_ssh2(ip, username, passwd, cmd)):
+    #             print 'Metadata service configured.'
+    #             exit_flag = True
+    #         else:
+    #             sys.exit('Failed to configure metadata.')
+    #     elif values1[1] =='Storage':
+    #         ip = values1[0]
+    #         print 'Define a custom numeric storage service ID and numeric storage target ID (both in range 1..65535)\n'
+    #         service_id =raw_input('Storage service ID:')
+    #         target_id = raw_input('Storage target ID:')
+    #         cmd = ['sudo service orcafs-storage status','sudo /opt/orcafs/sbin/orcafs-setup-storage -p /' + s_mount_path + '/orcafs_storage -s ' + service_id + ' -i '+target_id+' -m ' + mgmt_host_name,'sudo systemctl start orcafs-storage','sudo service orcafs-storage status']
+    #         if (cluster_ssh2(ip, username, passwd, cmd)):
+    #             print 'Storage service configured.'
+    #             exit_flag = True
+    #         else:
+    #             sys.exit('Failed to configure storage.')
+    #     else:
+    #         continue
+
+    for values2 in host_info.values():
+        if values2[1]=='Client':
+            ip = values2[0]
             print 'Define client mount directory with management service.\n'
             cmd = ['sudo service orcafs-client status','sudo /opt/orcafs/sbin/orcafs-setup-client -m '+mgmt_host_name,'sudo systemctl start orcafs-helperd','sudo systemctl start orcafs-client','sudo systemctl start orcafs-admon','sudo service orcafs-client status']
             ssh2(ip,username,passwd,cmd)
@@ -449,9 +574,9 @@ def check_cluster_status():
     # username = Helper.get_credential()['username']
     # passwd = Helper.get_credential()['password']
     exit_flag = False
-    for key in host_info.keys():
-        if key =='Client':
-            ip = host_info[key][0]
+    for values in host_info.values():
+        if values[1] =='Client':
+            ip = values[0]
             print 'Check Cluster Connection.\n'
             cmd =['sudo orcafs-df']
             if (ssh2(ip, username, passwd, cmd)):
@@ -462,11 +587,11 @@ if __name__=='__main__':
     print '\n'
     print '>>>>>>>>>>>>>>> This Script is used for OrcaFS Test Environment Setup <<<<<<<<<<<<<<<<<<\n\n'
     print '>>>>>>>>>>>>>>>Step1: Get the Servers Info<<<<<<<<<<<<<<<<<<\n'
-    # server_Info = Helper.get_hostinfo()
-    # print 'Server Role' + '\t\t' + 'Server IP Address' + '\t\t' + 'Server Hostname'
-    # for key, value in server_Info.items():
-    #     print key.ljust(10)+'\t\t'+value[0].ljust(17)+'\t\t'+value[1].ljust(10)
-    #
+    server_Info = Helper.get_hostinfo()
+    print 'Server Hostname' + '\t\t' + 'Server IP Address' + '\t\t' + 'Server Role'
+    for key, value in server_Info.items():
+        print key.ljust(14)+'\t\t'+value[0].ljust(18)+'\t\t'+value[1].ljust(20)
+
     # print '\n>>>>>>>>>>>>>>>Step2: Install Required Basic Softwares on the Server<<<<<<<<<<<<<<<<<<\n'
     # username  = Helper.get_credential()['username']
     # passwd = Helper.get_credential()['password']
@@ -476,20 +601,20 @@ if __name__=='__main__':
     #     print 'Install basic software failed'
     #     sys.exit(0)
     #
-    # print '\n>>>>>>>>>>>>>>>Step3: Configure Host<<<<<<<<<<<<<<<<<<\n'
-    # if write_etc_host():
-    #     print 'Updated the host configuration\n'
-    # else:
-    #     print 'Config host failed'
-    #     sys.exit(0)
-    #
+    print '\n>>>>>>>>>>>>>>>Step3: Configure Host<<<<<<<<<<<<<<<<<<\n'
+    if write_etc_host():
+        print 'Updated the host configuration\n'
+    else:
+        print 'Config host failed'
+        sys.exit(0)
+
     # print '\n>>>>>>>>>>>>>>>Step4: Downloading and install the RPM packages.<<<<<<<<<<<<<<<<<<\n'
     # if rpm_Download():
     #     print 'All OrcaFS rpm are downloaded from ftp server.'
     # else:
     #     print 'Download RPM failed'
     #     sys.exit(0)
-    #
+
     # print '\n>>>>>>>>>>>>>>>Step5: Install corresponding packages on the server.<<<<<<<<<<<<<<<<<<\n'
     # if remote_install():
     #     print 'All rpms are installed on the server'
@@ -497,33 +622,34 @@ if __name__=='__main__':
     #     print 'Install RPM failed'
     #     sys.exit(0)
     #
-    print '\n>>>>>>>>>>>>>>>Step6: Create File System on the Storage Server.<<<<<<<<<<<<<<<<<<\n'
-    s_mount_path = storage_mgmt()
-    if s_mount_path:
-        print 'Completed Storage Server RAID Configuration.'
-    else:
-        print 'Failed to configure RAID on the storage server'
-        sys.exit(0)
-
-    print '\n>>>>>>>>>>>>>>>Step7: Create File System on the Metadata Server.<<<<<<<<<<<<<<<<<<\n'
-    m_mount_path=metadata_mgmt()
-    if m_mount_path:
-        print 'Completed Metadata Server RAID Configuration.\n'
-    else:
-        print 'Failed to configure RAID on the metadata server'
-        sys.exit(0)
-
-    print '\n>>>>>>>>>>>>>>>Step8: Configure the Cluster.<<<<<<<<<<<<<<<<<<\n'
-    if config_cluster(s_mount_path,m_mount_path):
-        print'Completed the cluster configuration.'
-    else:
-        print 'Failed to configure the cluster.'
-
-    print '\n>>>>>>>>>>>>>>>Step9: Check the Cluster Status.<<<<<<<<<<<<<<<<<<\n'
-    if check_cluster_status():
-        print'Cluster Status is normal.'
-    else:
-        print 'Cluster Status is abnormal.'
+    # print '\n>>>>>>>>>>>>>>>Step6: Create File System on the Storage Server.<<<<<<<<<<<<<<<<<<\n'
+    # s_info = storage_mgmt()
+    # if s_info:
+    #     print 'Completed Storage Server RAID Configuration.'
+    # else:
+    #     print 'Failed to configure RAID on the storage server'
+    #     sys.exit(0)
+    #
+    # print '\n>>>>>>>>>>>>>>>Step7: Create File System on the Metadata Server.<<<<<<<<<<<<<<<<<<\n'
+    # m_info=metadata_mgmt()
+    # if m_info:
+    #     print 'Completed Metadata Server RAID Configuration.\n'
+    # else:
+    #     print 'Failed to configure RAID on the metadata server'
+    #     sys.exit(0)
+    #
+    # print '\n>>>>>>>>>>>>>>>Step8: Configure the Cluster.<<<<<<<<<<<<<<<<<<\n'
+    # config_info= dict(s_info,**m_info)
+    # if config_cluster(**config_info):
+    #     print'Completed the cluster configuration.'
+    # else:
+    #     print 'Failed to configure the cluster.'
+    #
+    # print '\n>>>>>>>>>>>>>>>Step9: Check the Cluster Status.<<<<<<<<<<<<<<<<<<\n'
+    # if check_cluster_status():
+    #     print'Cluster Status is normal.'
+    # else:
+    #     print 'Cluster Status is abnormal.'
 
 
 

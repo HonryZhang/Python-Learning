@@ -31,14 +31,14 @@ def install_rpm(cmd_list):
     hostname = commands.getoutput('hostname')
     print hostname
     for key in host_info.keys():
-        if hostname==host_info[key][1]:
-            if key == 'Client':
+        if hostname==key:
+            if host_info[key][1] == 'Client':
                 cmd_list1 = [cmd for cmd in cmd_list if 'client' in cmd or 'admon' in cmd or 'common' in cmd or 'helperd' in cmd or 'utils' in cmd or 'opentk' in cmd]
-            elif key == 'Storage':
+            elif host_info[key][1] == 'Storage':
                 cmd_list1 = [cmd for cmd in cmd_list if 'storage' in cmd or 'common' in cmd or 'opentk' in cmd]
-            elif key == 'Metadata':
+            elif host_info[key][1] == 'Metadata':
                 cmd_list1 = [cmd for cmd in cmd_list if 'meta' in cmd or 'common' in cmd or 'opentk' in cmd]
-            elif key == 'Management':
+            elif host_info[key][1] == 'Management':
                 cmd_list1 = [cmd for cmd in cmd_list if 'mgmtd' in cmd or 'common' in cmd or 'opentk' in cmd]
             else:
                 print 'No packages matched.'
@@ -55,6 +55,9 @@ def exe_cmd(cmd):
             else:
                 print 'Package installed.'
             cmd.remove(m)
+            break
+        else:
+            continue
     for m in cmd:
         print 'Current CMD is:', m
         stdout = commands.getoutput(m)
