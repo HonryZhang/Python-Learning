@@ -335,7 +335,7 @@ def config_cluster(**config_info):
             ip = values[0]
             print 'Define the management service running path.\n'
             mgmt_path = raw_input('Input the management service running path:')
-            cmd = ['sudo service orcafs-mgmtd status','sudo /opt/orcafs/sbin/orcafs-setup-mgmtd -p /'+mgmt_path+'/orcafs/beegfs_mgmtd','sudo systemctl start orcafs-mgmtd','sudo service orcafs-mgmtd status']
+            cmd = ['sudo service orcafs-mgmtd status','sudo /opt/orcafs/sbin/orcafs-setup-mgmtd -p '+mgmt_path+'/orcafs/beegfs_mgmtd','sudo systemctl start orcafs-mgmtd','sudo service orcafs-mgmtd status']
             #ssh2(ip, username, passwd, cmd)
             if (cluster_ssh2(ip, username, passwd, cmd)):
                 print 'Mamagement service configured.'
@@ -351,7 +351,7 @@ def config_cluster(**config_info):
                 print 'Define a custom numeric metadata service ID (range 1..65535) \n'
                 id = raw_input('Metadata Service ID of server %s:' % key)
                 cmd = ['sudo service orcafs-meta status',
-                       'sudo /opt/orcafs/sbin/orcafs-setup-meta -p /' + m_mount_path + '/orcafs/orcafs_meta -s ' + id + ' -m ' + mgmt_host_name,
+                       'sudo /opt/orcafs/sbin/orcafs-setup-meta -p ' + m_mount_path + '/orcafs/orcafs_meta -s ' + id + ' -m ' + mgmt_host_name,
                        'sudo systemctl start orcafs-meta', 'sudo service orcafs-meta status']
                 if (cluster_ssh2(ip, username, passwd, cmd)):
                     print 'Metadata service configured.'
@@ -366,7 +366,7 @@ def config_cluster(**config_info):
                 service_id = raw_input('Storage service ID of server %s:'%key)
                 target_id = raw_input('Storage target ID of server %s:'%key)
                 cmd = ['sudo service orcafs-storage status',
-                       'sudo /opt/orcafs/sbin/orcafs-setup-storage -p /' + s_mount_path + '/orcafs_storage -s ' + service_id + ' -i ' + target_id + ' -m ' + mgmt_host_name,
+                       'sudo /opt/orcafs/sbin/orcafs-setup-storage -p ' + s_mount_path + '/orcafs_storage -s ' + service_id + ' -i ' + target_id + ' -m ' + mgmt_host_name,
                        'sudo systemctl start orcafs-storage', 'sudo service orcafs-storage status']
                 if (cluster_ssh2(ip, username, passwd, cmd)):
                     print 'Storage service configured.'
