@@ -1,0 +1,435 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<data>
+<testsuite id="636" name="PG_Crush故障注入" >
+<node_order><![CDATA[6]]></node_order>
+<details><![CDATA[<p>
+	Crush的不同配置下的fio读写，故障注入</p>
+<p>
+	PG属性的修改，PG状态的改变下的故障注入</p>
+]]></details> 
+
+
+<testsuite id="1521" name="rollback" >
+<testcase internalid="889" name="在线修改pool的crush rule">
+	<node_order><![CDATA[6]]></node_order>
+	<externalid><![CDATA[158]]></externalid>
+	<version><![CDATA[1]]></version>
+	<summary><![CDATA[<p>
+	<img alt="" src="/testlink/third_party/kcfinder/upload_area/images/p2.PNG" style="width: 494px; height: 294px;" /></p>
+<p>
+	<img alt="" src="/testlink/third_party/kcfinder/upload_area/images/crush%20rule.PNG" style="width: 552px; height: 405px;" /></p>
+]]></summary>
+	<preconditions><![CDATA[<p>
+	node1，node2，node3为osd主机，每个osd主机上有若干个osd进程，node1，node2，node3也是mon主机，3个mon。创建crush rule规则，如图，将osd分成两个osddomain，domain1和domain2，每个domain都在每个host上有osd分布。在domain1上创建pool1，pool2，rule规则为1，在domain2上创建pool3，pool4，rule规则为2。每个pool中若干个rbd，对每个rbd 8k随机写进行数据预埋，保证每个osd下大概使用100G左右的使用容量。启动fio对其中两个rbd（rbd1来自pool1，rbd3来自pool3）进行随机写，带fio校验。</p>
+]]></preconditions>
+	<execution_type><![CDATA[1]]></execution_type>
+	<importance><![CDATA[3]]></importance>
+	<estimated_exec_duration></estimated_exec_duration>
+	<status>7</status>
+	<is_open>1</is_open>
+	<active>1</active>
+<steps>
+<step>
+	<step_number><![CDATA[1]]></step_number>
+	<actions><![CDATA[<p>
+	在fio读写过程中，手动修改pool1的crush rule规则，由rule 1设置为rule 2，观察集群状态，io状态</p>
+]]></actions>
+	<expectedresults><![CDATA[<p>
+	rbd1的io读写归零30秒以内，没有数据一致性问题</p>
+<p>
+	rbd3的io读写不受影响，没有数据一致性问题</p>
+<p>
+	pool1的pg全部迁移到osddomain2的osd上，集群状态OK</p>
+]]></expectedresults>
+	<execution_type><![CDATA[1]]></execution_type>
+</step>
+
+<step>
+	<step_number><![CDATA[2]]></step_number>
+	<actions><![CDATA[<p>
+	待pool1的pg全部迁移到osddomain2的osd后，在读写过程中，手动修改pool1的crush rule规则，由rule 2设置为rule 1，观察集群状态，io状态</p>
+]]></actions>
+	<expectedresults><![CDATA[<p>
+	rbd1的io读写归零30秒以内，没有数据一致性问题</p>
+<p>
+	rbd3的io读写不受影响，没有数据一致性问题</p>
+<p>
+	pool1的pg全部迁移到osddomain1的osd上，集群状态OK</p>
+]]></expectedresults>
+	<execution_type><![CDATA[1]]></execution_type>
+</step>
+
+<step>
+	<step_number><![CDATA[3]]></step_number>
+	<actions><![CDATA[<p>
+	在fio读写过程中，手动修改pool3的crush rule规则，由rule 2设置为rule 1，观察集群状态，io状态</p>
+]]></actions>
+	<expectedresults><![CDATA[<p>
+	rbd3的io读写归零30秒以内，没有数据一致性问题</p>
+<p>
+	rbd1的io读写不受影响，没有数据一致性问题</p>
+<p>
+	pool3的pg全部迁移到osddomain1的osd上，集群状态OK</p>
+]]></expectedresults>
+	<execution_type><![CDATA[1]]></execution_type>
+</step>
+
+<step>
+	<step_number><![CDATA[4]]></step_number>
+	<actions><![CDATA[<p>
+	待pool3的pg全部迁移到osddomain1的osd后，在读写过程中，手动修改pool3的crush rule规则，由rule 1设置为rule 2，观察集群状态，io状态</p>
+]]></actions>
+	<expectedresults><![CDATA[<p>
+	rbd3的io读写归零30秒以内，没有数据一致性问题</p>
+<p>
+	rbd1的io读写不受影响，没有数据一致性问题</p>
+<p>
+	pool3的pg全部迁移到osddomain2的osd上，集群状态OK</p>
+]]></expectedresults>
+	<execution_type><![CDATA[1]]></execution_type>
+</step>
+
+<step>
+	<step_number><![CDATA[5]]></step_number>
+	<actions><![CDATA[]]></actions>
+	<expectedresults><![CDATA[]]></expectedresults>
+	<execution_type><![CDATA[1]]></execution_type>
+</step>
+
+<step>
+	<step_number><![CDATA[6]]></step_number>
+	<actions><![CDATA[<p>
+	在fio读写过程中，手动修改pool1的crush rule规则，由rule 1设置为rule 2，观察集群状态，io状态</p>
+]]></actions>
+	<expectedresults><![CDATA[<p>
+	rbd1的io读写归零30秒以内，没有数据一致性问题</p>
+<p>
+	rbd3的io读写不受影响，没有数据一致性问题</p>
+<p>
+	pool1的pg全部迁移到osddomain2的osd上，集群状态OK</p>
+]]></expectedresults>
+	<execution_type><![CDATA[1]]></execution_type>
+</step>
+</steps>
+</testcase>
+
+
+<testcase internalid="726" name="PG恢复-rbd失效">
+	<node_order><![CDATA[31]]></node_order>
+	<externalid><![CDATA[141]]></externalid>
+	<version><![CDATA[1]]></version>
+	<summary><![CDATA[<p>
+	<img alt="" src="/testlink/third_party/kcfinder/upload_area/images/p2.PNG" style="width: 494px; height: 294px;" /></p>
+<p>
+	<img alt="" src="/testlink/third_party/kcfinder/upload_area/images/crush%20rule.PNG" style="width: 552px; height: 405px;" /></p>
+]]></summary>
+	<preconditions><![CDATA[<p>
+	node1，node2，node3为osd主机，每个osd主机上有若干个osd进程，node1，node2，node3也是mon主机，3个mon。创建crush rule规则，如图，将osd分成两个osddomain，domain1和domain2，每个domain都在每个host上有osd分布。在domain1上创建pool1，pool2，在domain2上创建pool3，pool4。每个pool中若干个rbd，对每个rbd 8k随机写进行数据预埋，保证每个osd下大概使用100G左右的使用容量。启动fio对其中两个rbd（rbd1来自pool1，rbd3来自pool3）进行随机写，带fio校验，在读写过程中，登录node1节点，将osddomain1，osddomain2各通过UI进行下电一个磁盘，将相应的osd.0 osd.1手动out出集群</p>
+]]></preconditions>
+	<execution_type><![CDATA[1]]></execution_type>
+	<importance><![CDATA[3]]></importance>
+	<estimated_exec_duration></estimated_exec_duration>
+	<status>7</status>
+	<is_open>1</is_open>
+	<active>1</active>
+<steps>
+<step>
+	<step_number><![CDATA[1]]></step_number>
+	<actions><![CDATA[<p>
+	在恢复的过程中，将osddomain1中的硬盘全部拔出，观察集群状态，io状态</p>
+]]></actions>
+	<expectedresults><![CDATA[<p>
+	osddomain1上的rbd读写挂起，osd进程正常退出，pg恢复暂停，集群有告警</p>
+<p>
+	osddomain2上的rbd读写不受影响，pg恢复正常</p>
+]]></expectedresults>
+	<execution_type><![CDATA[1]]></execution_type>
+</step>
+
+<step>
+	<step_number><![CDATA[2]]></step_number>
+	<actions><![CDATA[<p>
+	2分钟后，将osddomain1上的硬盘全部插回，启动osd进程，观察集群状态，io状态</p>
+]]></actions>
+	<expectedresults><![CDATA[<p>
+	osd进程启动成功，成功加入集群，osddomain1上的rbd恢复读写，没有一致性问题，pg恢复正常，最终恢复成功</p>
+<p>
+	osddomain2上的rbd读写不受影响，没有数据一致性问题，pg恢复正常，最终恢复完成</p>
+]]></expectedresults>
+	<execution_type><![CDATA[1]]></execution_type>
+</step>
+
+<step>
+	<step_number><![CDATA[3]]></step_number>
+	<actions><![CDATA[<p>
+	在恢复过程中，将osddomain2中的硬盘全部拔出，重复步骤1和步骤2</p>
+]]></actions>
+	<expectedresults><![CDATA[<p>
+	osddomain1中的rbd读写不受影响，没有数据一致性问题，pg恢复正常</p>
+<p>
+	磁盘拔出时：</p>
+<p>
+	osddomain2上的osd进程正常退出，集群有告警信息</p>
+<p>
+	rbd读写挂起，pg恢复暂停</p>
+<p>
+	磁盘插回后：</p>
+<p>
+	osddomain2上的osd进程启动成功，加入集群成功</p>
+<p>
+	rbd读写恢复，没有数据一致性问题，pg恢复开始</p>
+<p>
+	最终两个osddomain上的pg恢复全部完成</p>
+]]></expectedresults>
+	<execution_type><![CDATA[1]]></execution_type>
+</step>
+</steps>
+</testcase>
+
+<testcase internalid="728" name="PG恢复-修改pool的crush rule">
+	<node_order><![CDATA[32]]></node_order>
+	<externalid><![CDATA[142]]></externalid>
+	<version><![CDATA[1]]></version>
+	<summary><![CDATA[<p>
+	<img alt="" src="/testlink/third_party/kcfinder/upload_area/images/p2.PNG" style="width: 494px; height: 294px;" /></p>
+<p>
+	<img alt="" src="/testlink/third_party/kcfinder/upload_area/images/crush%20rule.PNG" style="width: 552px; height: 405px;" /></p>
+]]></summary>
+	<preconditions><![CDATA[<p>
+	node1，node2，node3为osd主机，每个osd主机上有若干个osd进程，node1，node2，node3也是mon主机，3个mon。创建crush rule规则，如图，将osd分成两个osddomain，domain1和domain2，每个domain都在每个host上有osd分布。在domain1上创建pool1，pool2，crush rule 1，在domain2上创建pool3，pool4，crush rule 2。每个pool中若干个rbd，对每个rbd 8k随机写进行数据预埋，保证每个osd下大概使用100G左右的使用容量。启动fio对其中两个rbd（rbd1来自pool1，rbd3来自pool3）进行随机写，带fio校验，在读写过程中，登录node1节点，将osddomain1，osddomain2各通过UI下电一个硬盘，将相应的osd.0 osd.1手动out出集群</p>
+]]></preconditions>
+	<execution_type><![CDATA[1]]></execution_type>
+	<importance><![CDATA[3]]></importance>
+	<estimated_exec_duration></estimated_exec_duration>
+	<status>7</status>
+	<is_open>1</is_open>
+	<active>1</active>
+<steps>
+<step>
+	<step_number><![CDATA[1]]></step_number>
+	<actions><![CDATA[<p>
+	在pg恢复过程中，手动修改pool1的crush rule规则，由rule 1设置为rule 2</p>
+]]></actions>
+	<expectedresults><![CDATA[<p>
+	rbd1的io读写归零30秒以内，没有数据一致性问题</p>
+<p>
+	rbd3的读写不受影响，没有数据一致性问题</p>
+<p>
+	pool1的pg全部迁移到osddomain2的osd上</p>
+<p>
+	pg恢复正常</p>
+]]></expectedresults>
+	<execution_type><![CDATA[1]]></execution_type>
+</step>
+
+<step>
+	<step_number><![CDATA[2]]></step_number>
+	<actions><![CDATA[<p>
+	待pool1的pg全部迁移到osddomain2的osd上后，在pg恢复过程中，手动修改pool1的crush rule规则，由rule 2设置为rule 1</p>
+]]></actions>
+	<expectedresults><![CDATA[<p>
+	rbd1的io读写归零30秒以内，没有数据一致性问题</p>
+<p>
+	rbd3的读写不受影响，没有数据一致性问题</p>
+<p>
+	pool1的pg全部迁移到osddomain1的osd上</p>
+<p>
+	pg恢复正常</p>
+]]></expectedresults>
+	<execution_type><![CDATA[1]]></execution_type>
+</step>
+
+<step>
+	<step_number><![CDATA[3]]></step_number>
+	<actions><![CDATA[<p>
+	在pg恢复过程中，手动设置pool3的crush rule规则，重复步骤1步骤2</p>
+]]></actions>
+	<expectedresults><![CDATA[<p>
+	rule 2设置为rule 1：</p>
+<p>
+	rbd3的io读写归零30秒以内，没有数据一致性问题</p>
+<p>
+	rbd1的读写不受影响，没有数据一致性问题</p>
+<p>
+	pool3的pg全部迁移到osddomain1的osd上</p>
+<p>
+	pg恢复正常</p>
+<p>
+	rule 1设置为rule 2：</p>
+<p>
+	rbd3的io读写归零30秒以内，没有数据一致性问题</p>
+<p>
+	rbd1的读写不受影响，没有数据一致性问题</p>
+<p>
+	pool3的pg全部迁移到osddomain2的osd上</p>
+<p>
+	pg恢复正常，最终pg恢复全部完成，集群状态为OK</p>
+]]></expectedresults>
+	<execution_type><![CDATA[1]]></execution_type>
+</step>
+</steps>
+</testcase>
+
+
+
+
+<testcase internalid="752" name="PG平衡-rbd失效">
+	<node_order><![CDATA[44]]></node_order>
+	<externalid><![CDATA[154]]></externalid>
+	<version><![CDATA[1]]></version>
+	<summary><![CDATA[<p>
+	<img alt="" src="/testlink/third_party/kcfinder/upload_area/images/p2.PNG" style="width: 494px; height: 294px;" /></p>
+<p>
+	<img alt="" src="/testlink/third_party/kcfinder/upload_area/images/crush%20rule.PNG" style="width: 552px; height: 405px;" /></p>
+]]></summary>
+	<preconditions><![CDATA[<p>
+	node1，node2，node3为osd主机，每个主机上若干个osd进程，使用node1，node2，node3做mon主机，三个mon。配置crush rule，创建两个osddomain，osddomain1和osddomain2上的osd在node1和node2上都有分布，osddomain1上创建pool1，pool2，crush rule 1，osddomain2上创建pool3，pool4，crush rule 2。每个pool若干个rbd，对每个rbd 8k随机写，使得每个osd下使用100G的容量左右。对其中两个rbd（rbd1属于pool1，rbd3属于pool3）启动fio读写，带一致性校验，在写的过程中，在node3上新添加2个osd到osddomain1，新添加另外两个osd到osddomain2，有pg的重新平衡</p>
+]]></preconditions>
+	<execution_type><![CDATA[1]]></execution_type>
+	<importance><![CDATA[3]]></importance>
+	<estimated_exec_duration></estimated_exec_duration>
+	<status>7</status>
+	<is_open>1</is_open>
+	<active>1</active>
+<steps>
+<step>
+	<step_number><![CDATA[1]]></step_number>
+	<actions><![CDATA[<p>
+	在平衡过程中，将osddomain1中的磁盘全部拔出，观察集群状态，io状态</p>
+]]></actions>
+	<expectedresults><![CDATA[<p>
+	磁盘拔出后，相应的osd进程正常退出，集群有告警信息</p>
+<p>
+	osddomain1中的rbd读写挂起，pg平衡暂停</p>
+<p>
+	osddomain2中的rbd读写不受影响，没有数据一致性问题，pg平衡正常</p>
+]]></expectedresults>
+	<execution_type><![CDATA[1]]></execution_type>
+</step>
+
+<step>
+	<step_number><![CDATA[2]]></step_number>
+	<actions><![CDATA[<p>
+	2分钟后，将osddomain1中的磁盘全部插回，启动osd进程，查看集群状态，io状态</p>
+]]></actions>
+	<expectedresults><![CDATA[<p>
+	磁盘插回后，启动osd进程成功，加入集群成功</p>
+<p>
+	osddomain1中的rbd读写恢复，没有数据一致性问题，pg平衡开始</p>
+<p>
+	osddomain2中的rbd读写不受影响，没有数据一致性问题，pg平衡正常</p>
+]]></expectedresults>
+	<execution_type><![CDATA[1]]></execution_type>
+</step>
+
+<step>
+	<step_number><![CDATA[3]]></step_number>
+	<actions><![CDATA[<p>
+	在平衡过程中，将osddomain2中的磁盘全部拔出，重复步骤1和步骤2</p>
+]]></actions>
+	<expectedresults><![CDATA[<p>
+	osddomain1中的rbd读写不受影响，没有数据一致性问题，pg平衡正常</p>
+<p>
+	磁盘拔出时：</p>
+<p>
+	osddomain2上的osd进程正常退出，集群有告警信息</p>
+<p>
+	rbd读写挂起，pg平衡暂停</p>
+<p>
+	磁盘插回后：</p>
+<p>
+	osddomain2上的osd进程启动成功，加入集群成功</p>
+<p>
+	rbd读写恢复，没有数据一致性问题，pg平衡开始</p>
+<p>
+	最终两个osddomain上的pg平衡全部完成</p>
+]]></expectedresults>
+	<execution_type><![CDATA[1]]></execution_type>
+</step>
+</steps>
+</testcase>
+
+<testcase internalid="754" name="PG平衡-修改pool的crush rule">
+	<node_order><![CDATA[45]]></node_order>
+	<externalid><![CDATA[155]]></externalid>
+	<version><![CDATA[1]]></version>
+	<summary><![CDATA[<p>
+	<img alt="" src="/testlink/third_party/kcfinder/upload_area/images/p2.PNG" style="width: 494px; height: 294px;" /></p>
+<p>
+	<img alt="" src="/testlink/third_party/kcfinder/upload_area/images/crush%20rule.PNG" style="width: 552px; height: 405px;" /></p>
+]]></summary>
+	<preconditions><![CDATA[<p>
+	node1，node2，node3为osd主机，使用node1，node2，node3做mon主机，三个mon。配置crush rule，创建两个osddomain，osddomain1和osddomain2上的osd在node1和node2上都有分布，osddomain1上创建pool1，pool2，crush rule 1，osddomain2上创建pool3，pool4，crush rule 2。每个pool若干个rbd，对每个rbd 8k随机写，使得每个osd下使用100G的容量左右。对其中两个rbd（rbd1属于pool1，rbd3属于pool3）启动fio读写，带一致性校验，在写的过程中，在node3上新添加2个osd到osddomain1，新添加另外两个osd到osddomain2，有pg的重新平衡</p>
+]]></preconditions>
+	<execution_type><![CDATA[1]]></execution_type>
+	<importance><![CDATA[3]]></importance>
+	<estimated_exec_duration></estimated_exec_duration>
+	<status>7</status>
+	<is_open>1</is_open>
+	<active>1</active>
+<steps>
+<step>
+	<step_number><![CDATA[1]]></step_number>
+	<actions><![CDATA[<p>
+	在pg平衡过程中，手动修改pool1的crush rule规则，由rule 1设置为rule 2</p>
+]]></actions>
+	<expectedresults><![CDATA[<p>
+	rbd1的io读写归零30秒以内，没有数据一致性问题</p>
+<p>
+	rbd3的io读写不受影响，没有数据一致性问题</p>
+<p>
+	pool1的pg全部迁移到osddomain2的osd上</p>
+<p>
+	pg平衡过程正常</p>
+]]></expectedresults>
+	<execution_type><![CDATA[1]]></execution_type>
+</step>
+
+<step>
+	<step_number><![CDATA[2]]></step_number>
+	<actions><![CDATA[<p>
+	待pool1的pg全部迁移到osddomain2的osd上后，在pg平衡过程中，手动修改pool1的crush rule规则，由rule 2设置为rule 1</p>
+]]></actions>
+	<expectedresults><![CDATA[<p>
+	rbd1的io读写归零30秒以内，没有数据一致性问题</p>
+<p>
+	rbd3的io读写不受影响，没有数据一致性问题</p>
+<p>
+	pool1的pg全部迁移到osddomain1的osd上</p>
+<p>
+	pg平衡过程正常</p>
+]]></expectedresults>
+	<execution_type><![CDATA[1]]></execution_type>
+</step>
+
+<step>
+	<step_number><![CDATA[3]]></step_number>
+	<actions><![CDATA[<p>
+	在pg平衡过程中，设置pool3的crush rule规则，重复步骤1到2</p>
+]]></actions>
+	<expectedresults><![CDATA[<p>
+	由rule 2设置为rule 1：</p>
+<p>
+	rbd3的io读写归零30秒以内，没有数据一致性问题</p>
+<p>
+	rbd1的io读写不受影响，没有数据一致性问题</p>
+<p>
+	pool3的pg全部迁移到osddomain1的osd上</p>
+<p>
+	pg平衡过程正常</p>
+<p>
+	由rule 1设置为rule 2：</p>
+<p>
+	rbd3的io读写归零30秒以内，没有数据一致性问题</p>
+<p>
+	rbd1的io读写不受影响，没有数据一致性问题</p>
+<p>
+	pool3的pg全部迁移到osddomain2的osd上</p>
+<p>
+	pg平衡过程正常，最终pg平衡全部完成，集群状态为OK</p>
+]]></expectedresults>
+	<execution_type><![CDATA[1]]></execution_type>
+</step>
+</steps>
+</testcase>
+</testsuite></testsuite></data>

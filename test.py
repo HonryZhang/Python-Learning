@@ -22,8 +22,9 @@ for i in range(name.count(2)):
     else:
         pos = name.index(2,pos+1 )
     print pos +1
+
 '''
-'''
+''' 
 keys = []
 value =[]
 import re
@@ -642,6 +643,7 @@ for key,values in info.items():
 # p = dict(pa,**params)
 # print p
 
+'''
 def yield_test(n):
     for i in range(n):
         yield call(i)
@@ -657,13 +659,40 @@ def call(i):
 for i in yield_test(5):
     print(i,",")
 
-def f123():
-    yield 1
-    print 'yyyy'
-    yield 2
-    print 'xxxx'
-    yield 3
-    print 'zzzz'
 
-for item in f123():
-    print item
+def ch1(num):
+    s = []
+    for i in range(4):
+        s.append(str(num % 256))
+        num /= 256
+
+
+    print '.'.join(s[::-1])
+ch1(123456778)
+import commands,os
+s_mount_path = raw_input('Input the filesystem mount path of Storage Server %s:')
+os.system('sudo mkdir -p '+s_mount_path)
+os.system('touch xxx')
+print os.getcwd()
+print s_mount_path
+'''
+import re
+str = '''<div style="margin: 0px; padding: 0px; font-family: &quot;Trebuchet MS&quot;, Arial, Verdana, sans-serif; font-size: 12px; background-color: rgb(238, 238, 238);">1，node1，node2，node3一共3个主机节点，这3个节点都为osd，mon节点，每个节点上若干个osd进程，其中node1是leader mon
+<div style="margin: 0px; padding: 0px; font-family: &quot;Trebuchet MS&quot;, Arial, Verdana, sans-serif; font-size: 12px; background-color: rgb(238, 238, 238);">2，集群状态正常，已经创建了rbd pool和rbd image，已经将rbd image在client端通过NBD的方式导出
+<div style="margin: 0px; padding: 0px; font-family: &quot;Trebuchet MS&quot;, Arial, Verdana, sans-serif; font-size: 12px; background-color: rgb(238, 238, 238);">3，副本数为2
+<div style="margin: 0px; padding: 0px; font-family: &quot;Trebuchet MS&quot;, Arial, Verdana, sans-serif; font-size: 12px; background-color: rgb(238, 238, 238);">4，客户端、服务器前端与Public Switch连接正常，服务器后端与Cluster Switch连接正常
+<div style="margin: 0px; padding: 0px; font-family: &quot;Trebuchet MS&quot;, Arial, Verdana, sans-serif; font-size: 12px; background-color: rgb(238, 238, 238);">5，在client端将nbd0（pool1）和nbd1（pool2）都创建成ext4的文件系统，分别挂载到/nbd0 和/nbd1目录下，在/nbd0 目录下写一个20G大小的文件20g.file，完成后拷贝到/nbd1目录下
+<div style="margin: 0px; padding: 0px; font-family: &quot;Trebuchet MS&quot;, Arial, Verdana, sans-serif; font-size: 12px; background-color: rgb(238, 238, 238);">6，拷贝完成后，对nbd0和nbd1做快照
+<div style="margin: 0px; padding: 0px; font-family: &quot;Trebuchet MS&quot;, Arial, Verdana, sans-serif; font-size: 12px; background-color: rgb(238, 238, 238);">7，对两个文件系统/nbd0 /nbd1进行写文件操作（一个写同名文件，rate=200k，保证COW持续的时间长，一个写不同名称的文件），对裸设备nbd2（pool1），nbd3（pool2）进行裸设备随机读写'''
+
+print type (str)
+pattern = '<div style="(.+)">$'
+#res = str.replace('<p>','').replace('^<img','q')
+#print res
+res1 = re.sub('<div.+">','',str)
+print res1
+
+#url = 'https://113.215.20.136:9011/113.215.6.77/c3pr90ntcya0/youku/6981496DC9913B8321BFE4A4E73/0300010E0C51F10D86F80703BAF2B1ADC67C80-E0F6-4FF8-B570-7DC5603F9F40.flv'
+#pattern = 'https://(.*?):9011/'
+#out = re.sub(pattern, 'https://127.0.0.1:9091/', url)
+#print out
